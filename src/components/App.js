@@ -1,38 +1,49 @@
 import React, { useState, useEffect } from "react";
-import React from "react";
-import './../styles/App.css';
+
 
 const App = () => {
-   const [data, setData] = useState(null);
+ const [data, setData] = useState(null);
+ const [loading, setLoading] = useState(false);
+ const [error, setError] = useState(null);
 
-  useEffect(() => {
-    // Fetch data once when component mounts
-    const fetchData = async () => {
-      try {
-        const response = await fetch("https://dummyjson.com/products");
-        const result = await response.json();
-        setData(result); // Update state asynchronously
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
 
-    fetchData();
-  }, []); // Empty dependency → runs once
+ useEffect(() => {
+   setLoading(true);
+   fetch("https://dummyjson.com/products")
+     .then((response) => response.json())
+     .then((json) => {
+       setData(json);
+       setLoading(false);
+     })
+     .catch((error) => {
+       setError(error);
+       setLoading(false);
+     });
+ }, []);
 
-  return (
-    <div id="main">
-        {/* Do not remove the main div */}
-     <h1>Data Fetcher</h1>
 
-      {/* Show loading until data arrives */}
-      {data ? (
-        <pre>{JSON.stringify(data, null, 2)}</pre>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </div>
-  )
-}
+ if (loading) {
+   return <div>Loading...</div>;
+ }
 
-export default App
+
+ if (error) {
+   return <div>An error occurred: {error.message}</div>;
+ }
+
+
+ if (!data) {
+   return <div>No data found</div>;
+ }
+
+
+ return (
+   <div>
+     <h1>Data Fetched from API</h1>
+     <pre>{JSON.stringify(data, null, 2)}</pre>
+   </div>
+ );
+};
+
+
+export default App;
